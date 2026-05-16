@@ -1,6 +1,11 @@
 name = "erdetsnartlordag-counter"
 main = "src/index.js"
 compatibility_date = "2025-05-01"
+workers_dev = false
+
+[[routes]]
+pattern = "xn--erdetsnartlrdag-gub.dk/api/count"
+zone_name = "xn--erdetsnartlrdag-gub.dk"
 
 [assets]
 directory = "./public"

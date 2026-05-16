@@ -46,8 +46,7 @@
   }
   FinishMessage = "Det er lørdag!";
 
-  // After `wrangler deploy`, swap in the deployed Worker URL.
-  var COUNTER_URL = "https://erdetsnartlordag-counter.s-rens-account.workers.dev";
+  var COUNTER_URL = "/api/count";
 
   function hitcount(callback) {
     var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
