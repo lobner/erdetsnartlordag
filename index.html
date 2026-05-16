@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="UTF-8" />
+<meta name="description" content="Her finder alt hvad hjertet kan begærer om emnet 'er det snart lørdag?'" />
+<meta name="keywords" content="lørdag, øl, porn, er det snart, lørdagskylling" />
+<meta name="author" content="malmo, kaares &amp; lobner" />
+<title>Er det snart lørdag?</title>
+<style>
+    b { color:red; }
+ body { text-align:center; }
+</style>
+
+<script>
+  var _gaq = _gaq || [];
+  _gaq.push(['_setAccount', 'UA-8813921-3']);
+  _gaq.push(['_trackPageview']);
+
+  (function() {
+    var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+    ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+    var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+  })();
+</script>
+
+<script>
+  var weekdaysLower = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
+  var now = new Date();
+  var weekday = now.getDay();
+  var weekdayName = weekdaysLower[weekday];
+
+  var daysUntilSaturday = (6 - weekday + 7) % 7;
+  if (daysUntilSaturday === 0) daysUntilSaturday = 7;
+  var saturday = new Date(now.getFullYear(), now.getMonth(), now.getDate() + daysUntilSaturday, 0, 0, 0, 0);
+
+  TargetDate = saturday.toString();
+  BackColor = "white";
+  ForeColor = "black";
+  CountActive = true;
+  CountStepper = -1;
+  LeadingZero = false;
+  if (weekday > 4) {
+    DisplayFormat = "%%H%% timer, %%M%%  minutter og %%S%%  sekunder.";
+  } else {
+    DisplayFormat = "%%D%% " + (weekday === 4 ? "dag" : "dage") + ", %%H%% timer, %%M%%  minutter og %%S%%  sekunder.";
+  }
+  FinishMessage = "Det er lørdag!";
+
+  function hitcount() {
+    var count = parseInt(localStorage.getItem("visitorCount") || "0", 10);
+    var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
+    var nowMs = Date.now();
+    if (nowMs - last > 3600 * 1000) {
+      count += 1;
+      localStorage.setItem("visitorCount", count.toString());
+      localStorage.setItem("visitorLast", nowMs.toString());
+    }
+    return count;
+  }
+</script>
+</head>
+<body>
+<script>
+  if (weekday === 6) {
+    document.write('<h1>Det ER lørdag... fedtfjæs...</h1>');
+  } else {
+    document.write(
+      '<div>' +
+      '<h1>NEJ!! - det er ikke LØRDAG din klaphat!<br />' +
+      '...det er jo ' + weekdayName + '.</h1>' +
+      '<img src="' + weekdayName + '.jpg" alt="Billede af en fed lort!" /> <br />' +
+      '<div>Det er lørdag om:&nbsp;&nbsp;'
+    );
+    document.write('<script src="countdown.js"><\/script>');
+    document.write('</div><h2>Kom endelig igen en anden gang!</h2></div>');
+  }
+  var hits = hitcount();
+  document.write('<div>Danne sidan er blivt fangat ' + hits + ' gånga i ahlt</div>');
+</script>
+
+<p>
+<a href="http://validator.w3.org/check?uri=referer">
+  <img src="valid-xhtml11-blue.png"
+       alt="Valid XHTML 1.1"
+       style="border:0;width:88px;height:31px;" />
+</a>
+<a href="http://jigsaw.w3.org/css-validator/check/referer">
+  <img style="border:0;width:88px;height:31px"
+       src="valid-css2-blue.png"
+       alt="Valid CSS2.1!" />
+</a>
+</p>
+
+<!-- <script src="snow.js"></script> -->
+
+</body>
+</html>
