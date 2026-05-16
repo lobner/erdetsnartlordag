@@ -46,26 +46,22 @@
   }
   FinishMessage = "Det er lørdag!";
 
-  // hitcount: read base count from visitors.log, add local visits on top
-  // (static site can't write back to the file, so we layer localStorage counting)
+  // After `wrangler deploy`, swap in the deployed Worker URL.
+  var COUNTER_URL = "https://erdetsnartlordag-counter.s-rens-account.workers.dev";
+
   function hitcount(callback) {
-    fetch('visitors.log')
-      .then(function(response) { return response.text(); })
-      .then(function(text) {
-        var baseCount = parseInt(text.trim(), 10) || 0;
-        var localCount = parseInt(localStorage.getItem("visitorCount") || "0", 10);
-        var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
-        var nowMs = Date.now();
-        if (nowMs - last > 3600 * 1000) {
-          localCount += 1;
-          localStorage.setItem("visitorCount", localCount.toString());
-          localStorage.setItem("visitorLast", nowMs.toString());
-        }
-        callback(baseCount + localCount);
+    var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
+    var nowMs = Date.now();
+    var shouldBump = nowMs - last > 3600 * 1000;
+    var method = shouldBump ? "POST" : "GET";
+
+    fetch(COUNTER_URL, { method: method })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (shouldBump) localStorage.setItem("visitorLast", nowMs.toString());
+        callback(data.count || 0);
       })
-      .catch(function() {
-        callback(0);
-      });
+      .catch(function() { callback(0); });
   }
 </script>
 </head>
