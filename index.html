@@ -46,16 +46,26 @@
   }
   FinishMessage = "Det er lørdag!";
 
-  function hitcount() {
-    var count = parseInt(localStorage.getItem("visitorCount") || "0", 10);
-    var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
-    var nowMs = Date.now();
-    if (nowMs - last > 3600 * 1000) {
-      count += 1;
-      localStorage.setItem("visitorCount", count.toString());
-      localStorage.setItem("visitorLast", nowMs.toString());
-    }
-    return count;
+  // hitcount: read base count from visitors.log, add local visits on top
+  // (static site can't write back to the file, so we layer localStorage counting)
+  function hitcount(callback) {
+    fetch('visitors.log')
+      .then(function(response) { return response.text(); })
+      .then(function(text) {
+        var baseCount = parseInt(text.trim(), 10) || 0;
+        var localCount = parseInt(localStorage.getItem("visitorCount") || "0", 10);
+        var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
+        var nowMs = Date.now();
+        if (nowMs - last > 3600 * 1000) {
+          localCount += 1;
+          localStorage.setItem("visitorCount", localCount.toString());
+          localStorage.setItem("visitorLast", nowMs.toString());
+        }
+        callback(baseCount + localCount);
+      })
+      .catch(function() {
+        callback(0);
+      });
   }
 </script>
 </head>
@@ -74,8 +84,13 @@
     document.write('<script src="countdown.js"><\/script>');
     document.write('</div><h2>Kom endelig igen en anden gang!</h2></div>');
   }
-  var hits = hitcount();
-  document.write('<div>Danne sidan er blivt fangat ' + hits + ' gånga i ahlt</div>');
+</script>
+
+<div id="hitcount"></div>
+<script>
+  hitcount(function(hits) {
+    document.getElementById('hitcount').textContent = 'Danne sidan er blivt fangat ' + hits + ' gånga i ahlt';
+  });
 </script>
 
 <p>
