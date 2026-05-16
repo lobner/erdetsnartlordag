@@ -2,6 +2,9 @@ name = "erdetsnartlordag-counter"
 main = "src/index.js"
 compatibility_date = "2025-05-01"
 
+[assets]
+directory = "./public"
+
 # Run `npx wrangler kv namespace create COUNTER` and paste the returned id below.
 [[kv_namespaces]]
 binding = "COUNTER"
