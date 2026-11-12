@@ -1,15 +1,21 @@
+import { DurableObject } from "cloudflare:workers";
+
 const ALLOWED_ORIGINS = new Set([
   "http://xn--erdetsnartlrdag-gub.dk",
   "https://xn--erdetsnartlrdag-gub.dk",
+  "http://www.xn--erdetsnartlrdag-gub.dk",
+  "https://www.xn--erdetsnartlrdag-gub.dk",
   "https://lobner.github.io",
   "http://localhost:8000",
   "http://127.0.0.1:8000",
+  "http://localhost:8787",
+  "http://127.0.0.1:8787",
 ]);
 
 const SEED = 78786;
 
 function corsHeaders(origin) {
-  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://lobner.github.io";
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://xn--erdetsnartlrdag-gub.dk";
   return {
     "Access-Control-Allow-Origin": allow,
     "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -18,10 +24,29 @@ function corsHeaders(origin) {
   };
 }
 
-async function readCount(env) {
-  const raw = await env.COUNTER.get("count");
-  const parsed = parseInt(raw ?? "", 10);
-  return Number.isFinite(parsed) ? parsed : SEED;
+export class CounterObject extends DurableObject {
+  async #getOrInitCount() {
+    let count = await this.ctx.storage.get("count");
+    if (typeof count === "number") {
+      return count;
+    }
+
+    const raw = this.env.COUNTER ? await this.env.COUNTER.get("count") : null;
+    const parsed = parseInt(raw ?? "", 10);
+    count = Number.isFinite(parsed) ? parsed : SEED;
+    await this.ctx.storage.put("count", count);
+    return count;
+  }
+
+  async getCount() {
+    return this.#getOrInitCount();
+  }
+
+  async increment() {
+    const next = (await this.#getOrInitCount()) + 1;
+    await this.ctx.storage.put("count", next);
+    return next;
+  }
 }
 
 export default {
@@ -33,17 +58,16 @@ export default {
       return new Response(null, { status: 204, headers });
     }
 
-    if (request.method === "POST") {
-      const next = (await readCount(env)) + 1;
-      await env.COUNTER.put("count", next.toString());
-      return new Response(JSON.stringify({ count: next }), { headers });
+    if (request.method !== "GET" && request.method !== "POST") {
+      return new Response("Method Not Allowed", { status: 405, headers });
     }
 
-    if (request.method === "GET") {
-      const count = await readCount(env);
-      return new Response(JSON.stringify({ count }), { headers });
-    }
+    const id = env.COUNTER_DO.idFromName("global");
+    const stub = env.COUNTER_DO.get(id);
+    const count = request.method === "POST"
+      ? await stub.increment()
+      : await stub.getCount();
 
-    return new Response("Method Not Allowed", { status: 405, headers });
+    return new Response(JSON.stringify({ count }), { headers });
   },
 };
