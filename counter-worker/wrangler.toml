@@ -7,10 +7,22 @@ workers_dev = false
 pattern = "xn--erdetsnartlrdag-gub.dk/api/count"
 zone_name = "xn--erdetsnartlrdag-gub.dk"
 
+[[routes]]
+pattern = "www.xn--erdetsnartlrdag-gub.dk/api/count"
+zone_name = "xn--erdetsnartlrdag-gub.dk"
+
 [assets]
 directory = "./public"
 
-# Run `npx wrangler kv namespace create COUNTER` and paste the returned id below.
+[[durable_objects.bindings]]
+name = "COUNTER_DO"
+class_name = "CounterObject"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["CounterObject"]
+
+# Kept for one-time seeding into CounterObject on first request.
 [[kv_namespaces]]
 binding = "COUNTER"
 id = "ac5e956c3c7a452ab5ad2eeb67434234"

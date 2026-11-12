@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Her finder alt hvad hjertet kan begærer om emnet 'er det snart lørdag?'" />
+  <meta name="keywords" content="lørdag, øl, porn, er det snart, lørdagskylling" />
+  <meta name="author" content="malmo, kaares &amp; lobner" />
+  <title>Er det snart lørdag?</title>
+  <style>
+    body {
+      text-align: center;
+    }
+    b {
+      color: red;
+    }
+    img {
+      max-width: 100%;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <div id="app"></div>
+  <div id="hitcount"></div>
+
+  <script>
+    (function () {
+      var WEEKDAYS = ["søndag", "mandag", "tirsdag", "onsdag", "torsdag", "fredag", "lørdag"];
+      var APEX_HOST = "xn--erdetsnartlrdag-gub.dk";
+      var COUNTER_URL = location.hostname === APEX_HOST
+        ? "/api/count"
+        : "https://" + APEX_HOST + "/api/count";
+
+      var app = document.getElementById("app");
+      var hitcountEl = document.getElementById("hitcount");
+
+      function renderSaturday() {
+        app.innerHTML = "<h1>Det ER lørdag... fedtfjæs...</h1>";
+      }
+
+      function renderCountdown() {
+        var now = new Date();
+        var weekday = now.getDay();
+        if (weekday === 6) {
+          renderSaturday();
+          return;
+        }
+
+        var weekdayName = WEEKDAYS[weekday];
+        var daysUntilSaturday = (6 - weekday + 7) % 7;
+        var saturday = new Date(
+          now.getFullYear(),
+          now.getMonth(),
+          now.getDate() + daysUntilSaturday,
+          0, 0, 0, 0
+        );
+
+        app.innerHTML = "";
+
+        var h1 = document.createElement("h1");
+        h1.appendChild(document.createTextNode("NEJ!! - det er ikke LØRDAG din klaphat!"));
+        h1.appendChild(document.createElement("br"));
+        h1.appendChild(document.createTextNode("...det er jo " + weekdayName + "."));
+
+        var img = document.createElement("img");
+        img.src = weekdayName + ".jpg";
+        img.alt = "Billede af en fed lort!";
+
+        var countdownRow = document.createElement("div");
+        countdownRow.appendChild(document.createTextNode("Det er lørdag om:\u00a0\u00a0"));
+        var cntdwn = document.createElement("span");
+        cntdwn.id = "cntdwn";
+        countdownRow.appendChild(cntdwn);
+
+        var h2 = document.createElement("h2");
+        h2.textContent = "Kom endelig igen en anden gang!";
+
+        app.appendChild(h1);
+        app.appendChild(img);
+        app.appendChild(document.createElement("br"));
+        app.appendChild(countdownRow);
+        app.appendChild(h2);
+
+        function updateTimer() {
+          var remainingMs = saturday.getTime() - Date.now();
+          if (remainingMs <= 0) {
+            clearInterval(timerId);
+            renderSaturday();
+            return;
+          }
+
+          var totalSecs = Math.floor(remainingMs / 1000);
+          var days = Math.floor(totalSecs / 86400);
+          var hours = Math.floor((totalSecs % 86400) / 3600);
+          var mins = Math.floor((totalSecs % 3600) / 60);
+          var secs = totalSecs % 60;
+
+          if (days > 0) {
+            var dayLabel = days === 1 ? "dag" : "dage";
+            cntdwn.innerHTML =
+              "<b>" + days + "</b> " + dayLabel + ", " +
+              "<b>" + hours + "</b> timer, " +
+              "<b>" + mins + "</b> minutter og " +
+              "<b>" + secs + "</b> sekunder.";
+          } else {
+            cntdwn.innerHTML =
+              "<b>" + hours + "</b> timer, " +
+              "<b>" + mins + "</b> minutter og " +
+              "<b>" + secs + "</b> sekunder.";
+          }
+        }
+
+        updateTimer();
+        var timerId = setInterval(updateTimer, 250);
+      }
+
+      function loadHitcount() {
+        var last = parseInt(localStorage.getItem("visitorLast") || "0", 10);
+        var nowMs = Date.now();
+        var shouldBump = nowMs - last > 3600 * 1000;
+        var method = shouldBump ? "POST" : "GET";
+
+        fetch(COUNTER_URL, { method: method })
+          .then(function (r) {
+            if (!r.ok) throw new Error("HTTP " + r.status);
+            return r.json();
+          })
+          .then(function (data) {
+            if (shouldBump) localStorage.setItem("visitorLast", nowMs.toString());
+            hitcountEl.textContent = "Danne sidan er blivt fangat " + (data.count || 0) + " gånga i ahlt";
+          })
+          .catch(function () {
+            hitcountEl.textContent = "Danne sidan er blivt fangat 0 gånga i ahlt";
+          });
+      }
+
+      renderCountdown();
+      loadHitcount();
+    })();
+  </script>
+
+  <script src="snow.js?v=3" defer></script>
+</body>
+</html>
